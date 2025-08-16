@@ -1,9 +1,10 @@
-# mkdocs.yml
 site_name: Audio AI Explainer
 theme:
   name: material
 
 extra_css:
-  - https://pyscript.net/releases/2025.2.3/core.css
+  - https://pyscript.net/releases/2025.7.3/core.css
+
 extra_javascript:
-  - https://pyscript.net/releases/2025.2.3/core.js
+  - path: https://pyscript.net/releases/2025.7.3/core.js
+    type: module
