@@ -1,6 +1,9 @@
 site_name: Audio AI Explainer
 theme:
   name: material
+  # (optional but helpful during setup)
+  features:
+    - navigation.instant: false   # prevents partial reload issues with third-party scripts
 
 extra_css:
   - https://pyscript.net/releases/2025.7.3/core.css
