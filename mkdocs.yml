@@ -16,4 +16,8 @@ nav:
   - Home: index.md
   - What is audio?: what-is-audio.md
   - How is audio represented digitally?: how-is-audio-represented-digitally.md
-  - How Older Audio Models Work: how-older-audio-models-work.md
+  - How older audio models work: how-older-audio-models-work.md
+  - Speech, language, and semantics: speech-language-and-semantics.md
+  - Audio in LLMs: audio-in-llms.md
+  - Audio AI legal and regulatory issues: audio-ai-legal-and-regulatory-issues.md
+  - Major open questions for audio AI: major-open-questions-for-audio-ai.md
