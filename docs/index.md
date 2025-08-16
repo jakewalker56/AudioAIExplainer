@@ -1,13 +1,23 @@
-<link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
-<script defer src="https://pyscript.net/latest/pyscript.js"></script>
-
+<!-- Configure PyScript: tell it which packages to load -->
 <py-config>
-  packages = ["altair", "pandas"]  # Pyodide will load these in-browser
+{
+  "packages": ["pandas", "altair", "vega_datasets"]
+}
 </py-config>
 
+<!-- Run inline Python in the page -->
 <py-script>
+from pyscript import display
 import pandas as pd, altair as alt
-df = pd.DataFrame({"x": range(10), "y": [v*v for v in range(10)]})
-chart = alt.Chart(df).mark_line().encode(x="x", y="y")
-display(chart)   # renders inline and interactive
+from vega_datasets import data
+
+df = data.cars()
+chart = alt.Chart(df).mark_point().encode(
+    x="Horsepower",
+    y="Miles_per_Gallon",
+    color="Origin",
+    tooltip=["Name","Horsepower","Miles_per_Gallon"]
+)
+
+display(chart)  # renders the chart inline
 </py-script>
