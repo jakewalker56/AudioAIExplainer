@@ -11,3 +11,8 @@ extra_css:
 extra_javascript:
   - path: https://pyscript.net/releases/2025.7.3/core.js
     type: module
+
+nav:
+  - Home: index.md
+  - What is audio?: what-is-audio.md
+  - How Older Audio Models Work: how-older-audio-models-work.md
