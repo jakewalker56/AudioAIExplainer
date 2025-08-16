@@ -12,12 +12,17 @@ extra_javascript:
   - path: https://pyscript.net/releases/2025.7.3/core.js
     type: module
 
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+
 nav:
-  - Home: index.md
+  - About: index.md
   - What is audio?: what-is-audio.md
-  - How is audio represented digitally?: how-is-audio-represented-digitally.md
-  - How older audio models work: how-older-audio-models-work.md
+  - Digital audio representations: how-is-audio-represented-digitally.md
+  - How older ML models work: how-older-audio-models-work.md
   - Speech, language, and semantics: speech-language-and-semantics.md
   - Audio in LLMs: audio-in-llms.md
-  - Audio AI legal and regulatory issues: audio-ai-legal-and-regulatory-issues.md
-  - Major open questions for audio AI: major-open-questions-for-audio-ai.md
+  - Legal and regulatory issues: audio-ai-legal-and-regulatory-issues.md
+  - Major open research questions: major-open-questions-for-audio-ai.md

@@ -1,14 +1,25 @@
 # What is audio?
 
-This page discusses what exactly it is that we perceive as "audio" and the mechanics of how audio propagates around in the real world
+This page discusses what exactly it is that we perceive as "audio" and the mechanics of how audio propagates around in the real world.
 
 <div id="viz-audio"></div>
-<script type="py" src="py/what_is_audio.py" config="pyscript.toml" target="#viz-audio"></script>
+<script type="py" src="py/what_is_audio.py" config="py/pyscript.toml" target="#viz-audio"></script>
 
 ## Pressure Waves
 What humans perceive as "sounds" are actually pressure changes in the air over time.  
 
-A local pocket of high air pressure (aka compression) is created when something physically pushes air molecules together. Those air molecules have to come from somewhere, so this also creates local pockets of low pressure somewhere nearby. Air molecules in the high pressure area push outward into any low pressure areas around them, while air molecules around any low pressure area push inward to fill the vaccuum.  As the nearby air moves around to equalize these pressure differentials, it creates new pressure differentials with the air on the opposite side of the original disturbance, which in turn try to equalize, create new differentials, etc.  This ultimately creates pockets of high and low pressure that propogate outward from the original point in a shape that we call "waves" (these are exactly the same fluid dynamics that cause ripples when you drop a pebble in water). When you "hear" a sound, that is your brain interpreting these pressure waves. [Aside] See https://nsinstruments.com/principles/approaches.html for a deeper explanation [/Aside]
+A local pocket of high air pressure (aka compression) is created when something physically pushes air molecules together. Those air molecules have to come from somewhere, so this also creates local pockets of low pressure somewhere nearby. Air molecules in the high pressure area push outward into any low pressure areas around them, while air molecules around any low pressure area push inward to fill the vaccuum.  As the nearby air moves around to equalize these pressure differentials, it creates new pressure differentials with the air on the opposite side of the original disturbance, which in turn try to equalize, create new differentials, etc.  This ultimately creates pockets of high and low pressure that propogate outward from the original point in a shape that we call "waves" (these are exactly the same fluid dynamics that cause ripples when you drop a pebble in water). When you "hear" a sound, that is your brain interpreting these pressure waves. 
+??? info "more resources 1"
+	See https://nsinstruments.com/principles/approaches.html for a deeper explanation
+
+??? info "more resources 2"
+    This text is **hidden by default** and expands on click.
+    You can use full Markdown here (lists, code, images, etc.).
+
+??? note "more resources 3"
+    This text is **hidden by default** and expands on click.
+    You can use full Markdown here (lists, code, images, etc.).
+
 
 [GIF] visualization of a sin wave oscilating, and below that an aligned visualization of scattered particles on a 2D plane moving in such a way as to show the "wave" passing through them [/GIF]
 
