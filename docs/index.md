@@ -3,7 +3,7 @@
 <div id="viz">
   <img src="assets/cars_scatter.png" alt="Loading interactive chart…" />
 </div>
-<script type="py" src="main.py" config="pyscript.toml" target="#viz"></script>
+<script type="py" src="py/index-viz-1.py" config="pyscript.toml" target="#viz"></script>
 
 <!-- Quick inline sanity check -->
 <script type="py">
