@@ -1,5 +1,5 @@
 # AudioAIExplainer
-Writing down everything I (think I) know about audio AI systems
+An intuitive introduction to Audio AI
 
 ## What Is Audio?
 
@@ -93,7 +93,7 @@ In the real world, you're usually hearing thousands of overlapping frequency wav
 When people talk about the "frequency" of a note played by an instrument (or sung by a human), they're talking about the "fundamental frequency" (often referred to as f0) which is the lowest (and often perceived as the "loudest") frequency present in that complex tone.
 
 ### Frequency Bands
-Frequency is an analog value, meaning it is continuous and can be specified to essentially arbitrary precision.  However, in the real world there's a limit to the precision with which we can measure and produce specific frequencies, and the frequency of a signal can shift over time.  Given that nearby frequencies tend to behave similarly, it is often useful to think in terms of frequency ranges, which we generically refer to as "frequency bands" (e.g. "5 kHz - 6 kHz"). 
+Frequency is an analog value, meaning it is continuous and can be specified to arbitrary precision.  However, in the real world there's a limit to the precision with which we can measure and produce specific frequencies, and the frequency of a signal can shift over time.  Given that nearby frequencies tend to behave similarly, it is often useful to think in terms of frequency ranges, which we generically refer to as "bands" (e.g. "5 kHz - 6 kHz"). 
 
 There is no single correct way to bucket frequency ranges together, but there are conventions depending on the context. Frequency tends to behaves in logarithmic ways (i.e. the ratio of two frequencies is generally more important than the absolute difference between them), so frequency band conventions are often simillarly logarithmic (e.g. 50 Hz - 100 Hz might be one band, while 4 kHz - 8 kHz might be another band).
 
@@ -146,6 +146,12 @@ Because of this, digital media replayed from a single speaker tends to lack a de
 
 Recording stereo audio requires multiple microphones with a known spatial relationship (aka a "microphone array"), and most consumer recording devices (e.g. phones) come with a mic array of between 2-8 mics.  [TODO: verify this is correct] For simplicity, we will mostly talk about mono channel audio going forward, but in principle most approaches, techniques, and concerns generalize to multichannel audio.
 
+### Directional Beamforming
+
+Directional beamforming is a processing technique that allows an audio signal recorded on two or more mics to be decomposed based on the direction the sound came from.  Essentially this relies on the fact that the delay between when mic 1 and mic 2 hear the same sound is a function of the angle of the sound source relative to the microphones and the distance of the mics from each other.  For only two microphones a known distance apart, a given audio delay is enough to specify a parabolic cone [TODO: name for this?] along which the sound must have originated; by adding a third mic you can in theory specify a specific point (including distance) of the orignal audio source (so long as that point is not co-planar with the 3 mics).
+
+In practice what this means is that you can take audio recorded on a microphone array with known dimensions and filter it (i.e. delay one and add them together) so that sounds not coming from one particular direction cancel each other out, leaving you only the sounds coming from a particular direction.  This is useful when you want to do things like "record audio coming from right in front of a camera while supressing any audio coming from the ambient environment," or "separate speech coming from one speaker from speech coming from a second speaker," both of which are potentially relevant for audio AI models. [Aside] In the context of this document, we mention this mostly to make the point that it is possible in some contexts to isolate different information streams within the same audio recording.  This opens up some possibilities for novel audio tokenization / preprocessing that could improve model performance that are discussed below [/Aside]
+
 ## How is audio digitally represented?
 
 Audio is a continuous analog signal, which cannot be represented directly in a computer.  Instead, computers operate on digital approximations of those signals - for example, images are typically represented as arrays of pixels with discrete rgb values between 0 and 255.  Simillarly, audio is represented a sequence of amplitude values ("samples") that correspond to the value of the sound pressure wave at a given point in time (the "audio waveform").  These samples always occur at a constant rate (called the "sample rate") within a given audio file, meaning the time interval between any two consecutive samples is the same.  The sample rate is measured in Hertz (samples per second).  For example, if you have a sample rate of 200 Hz, that would mean you store 200 pressure values per second. When audio is analyzed or played back on a speaker, you can generally think of it as interpolating between these discrete points - for example, a speaker that needs to output pressure A at t = 0 and pressure B at t = 1 will try to linearly transition from A to B over that timespan. 
@@ -158,13 +164,13 @@ Video files typically store audio data in an independent datastream from the vid
 
 Common sample rates for digital audio are 8 kHz, 16 kHz, 24 kHz, and 48 kHz (often referred to as 8k, 16k, 24k, and 48k).  
 
-[Aside] If you Google it today, you'll see lots of sources saying that most audio is 48k, but my experience has been that a shockingly large amount of audio data used in research is 16k or 24k.  My guess is that a substantial amount of audio data captured and uploaded to the internet in the early 2000's and 2010's was at lower sample rates, but as consumer devices have improved, so has typical recording quality. As of January 2025 when I left Google, to my knowledge none of our models were being trained on any high-scale 48k audio datasets (though efforts were underway to migrate in this direction) [/Aside]
+[Aside] If you Google it today, you'll see lots of sources saying that most audio is 48k, but my experience has been that a shockingly large amount of audio data used in research is 16k or 24k.  My guess is that a substantial amount of audio data captured and uploaded to the internet in the early 2000's and 2010's was at lower sample rates, but as consumer devices have improved, so has typical recording quality. As of January 2025, to my knowledge most large audio models were not being trained on any high-scale 48k audio datasets (though efforts are underway to migrate in this direction) [/Aside]
 
-Some audio is recorded or produced in 96k or 192k, but the difference between these and 48 kHz is unlikely to be perceptually distinguishable by humans.  The reason for this is because of something called the Nyquist-Shannon Sampling Theorem, which says that if a signal is sampled at a rate at least twice its highest frequency component present in that signal, the original signal can theoretically be perfectly reconstructed from the samples.  We will discuss this in more detail in the Fourier Transform section below, but in practice this means that 48k audio data is capable of encoding any signal up to 24 kHz frequency (the maximum encodable frequency is called the "Nyquist frequency," and is always half the sample rate frequency). But as we said before, typical human hearing range is roughly 20 Hz - 20 kHz, deteriorating to 8 kHz - 12 kHz as we age into our 40s and 50s, so any signal that can be heard by most humans can be encoded in 48k audio.  
+Some audio is recorded or produced in 96k or 192k, but the difference between these and 48 kHz is unlikely to be perceptually distinguishable by humans.  The reason for this is because of something called the Nyquist-Shannon Sampling Theorem, which says that if a signal is sampled at a rate at least twice its highest frequency component present in that signal, the original signal can theoretically be perfectly reconstructed from the samples.  We will discuss this in more detail in the Fourier Transform section below, but in practice this means that 48k audio data is capable of encoding any signal up to 24 kHz frequency (the maximum encodable frequency is called the "Nyquist frequency," and is always half the sample rate frequency). But as we said before, typical human hearing range is roughly 20 Hz - 20 kHz, with the upper limit deteriorating to 8 kHz - 12 kHz as we age into our 40s and 50s, so any signal that can be heard by most humans can be encoded in 48k audio.  
 
 [Aside] Nevertheless, you will find audiophiles who claim to hear a difference between 48k and 96k audio.  It's possible that lower sample rates may create artifacts because of hardware limitations, processing artifacts, or other things beyond the theoretical limitations of the Nyquist frequency, but we can at least conclusively say any such differences are negligible except in the most extreme of listening and recording environments. [/Aside]
 
-Note that the fundamental frequency of human speech generally ranges from ~80-300 Hz, with most of the speech energy concentrated from 250 Hz - 5 kHz.  Most 8k audio data used in audio research comes from the US telephony stack, which uses an 8k sample rate (and therefore can capture signals at 4 kHz and below).  This is why telephone calls sound "compressed" - they are missing the high frequency bands typically present in human speech.  This is also why historical text-to-speech models have been limted to lower sample rate output (often 16k or 22k).  However, some specific elements of speech occur above the Nyquist frequencies for these sample rates (for example "sibilance" is the sharp hissing audible in "s" and "sh" sounds, and mostly occurs from 5 kHz - 10 kHz, but may go even higher). Newer TTS models are trained on and produce higher sample rate audio, and arguably this is a contributing factor in the improved perceptual quality of recent models (particularly as they become more prosodically expressive as they adopt Transformer architecture backbones as discussed below)
+The fundamental frequency of human speech generally ranges from ~80-300 Hz, with most of the speech energy concentrated from 250 Hz - 5 kHz.  Most 8k audio data used in audio research comes from the US telephony stack, which uses an 8k sample rate (and therefore can capture signals at 4 kHz and below).  This is why telephone calls sound "compressed" - they are missing the high frequency bands typically present in human speech.  This is also why historical text-to-speech models have been limted to lower sample rate output (often 16k or 22k).  However, some specific elements of speech occur above the Nyquist frequencies for these sample rates (for example "sibilance" is the sharp hissing audible in "s" and "sh" sounds, and mostly occurs from 5 kHz - 10 kHz, but may go even higher). Newer TTS models are trained on and produce higher sample rate audio, and arguably this is a contributing factor in the improved perceptual quality of recent models (particularly as they become more prosodically expressive as they adopt Transformer architecture backbones as discussed below)
 
 A funny complicating factor here is that many senior audio researchers are in their 40s and 50s and have likely lost some sensitivity to higher frequency band; so the people leading research may not be able to tell a difference between 24k and 48k audio even if you can!
 
@@ -202,7 +208,7 @@ We are not going to go through all the math behind the Fourier Transform here, p
 
 ### Intuitive Explanation of the Fourier Transform
 
-Imagine we had a magical oracle where we could plug in an arbitrarily complicated periodic function s [Aside] Meaning s can be perfectly reproduced by combinging some finite number of component sine waves with different frequency, amplitude, and phase values [Aside] and a frequency value f, and *if and only if f is a component frequency of s*, our oracle would output a value representing the amplitude of that component frequency in s. In all other cases the oracle would output 0.  If we had such an oracle, then we could simply graph the output from f = 0 to f = 20,000 Hz for our given signal, and we would see spikes at exactly the component frequencies present, where the size of the spike tells us the amplitude of the component sine wave.
+Imagine we had a magical oracle where we could plug in an arbitrarily complicated periodic function s [Aside] Meaning s can be perfectly reproduced by combining some finite number of component sine waves with different frequency, amplitude, and phase values [Aside] and a frequency value f, and *if and only if f is a component frequency of s*, our oracle would output a value representing the amplitude of that component frequency in s. In all other cases the oracle would output 0.  If we had such an oracle, then we could simply graph the output from f = 0 to f = 20,000 Hz for our given signal, and we would see spikes at exactly the component frequencies present, where the size of the spike tells us the amplitude of the component sine wave.
 
 Now how would we build such an oracle?  Let's imagine you wanted to check whether a target frequency f was present in the signal. The first thing you could do is take the complicated periodic input function s and chop it up into blocks exactly the size of the period of f.  So if the f you're investigating is 4 Hz, then you chop up s into a bunch of blocks each 0.25 seconds long.  Next, imagine you stacked a bunch of those chopped up sections on top of each other and averaged them all together. 
 
@@ -211,14 +217,14 @@ Now how would we build such an oracle?  Let's imagine you wanted to check whethe
 Note that if there is some periodic signal at exactly f = 4 Hz, that signal would be *exactly the same in every single one of those blocks*, so the interference between that signal and itself would be *constructive* as you added more blocks; it wouldn't get "averaged away" as you added more blocks on top of each other.
 
 Now consider all the frequencies *other* than this target frequency. Observe that these frequencies fall into two categories: 
-1) For the frequencies that are some integer n multiple of f, they will undergo exactly n cycles within the block window.  For example, f = 8 Hz will undergo exactly 2 cycles in a 0.25 s window, f = 12 Hz will undergo exactly 3 cycles, etc.
+1) For the frequencies that are some integer multiple of f, they will undergo exactly n cycles within the block window.  For example, f = 8 Hz will undergo exactly 2 cycles in a 0.25 s window, f = 12 Hz will undergo exactly 3 cycles, etc.
 2) Any other frequency will undergo a fractional number (i.e. not an integer number) of cycles within the window.  The number of cycles is given by the ratio of the frequency to the target frequency.  So for example, a 6 Hz signal will go through 6 / 4 = 1.5 cycles per 0.25s window, and a 9 Hz signal will go through 9 / 4 = 2.25 cycles per 0.25s window.
 
 We'll deal with case #1 in a bit, but for now let's focus on case #2.  If a wave undergoes a fractional cycle, that implies that the wave will be in a different phase at the start of the next window.  Whatever this phase change is, the same amount of phase change will happen between the second and third window, and the same phase change will happen again between the fourth and fifth window, etc.
 
 [GIF] GIF showing the above [/GIF]
 
-If the ratio of the target frequency and the frequency we're investiaging is a rational number (i.e. can be represented with a whole number fraction), then eventually this phase will come back around to zero (possibly taking several "loops" between 0 and 2 pi at different values - but always the same interval - before landing exactly on 2 pi).  If you took all the phase value this wave had at the start of each block in the sequence before it comes back around to zero and you sorted them from lowest to highest, you would find these phase values are always *uniformly distributed* between 0 and 2pi (meaning the distance between neighboring points is equal to 2pi / N, where N is the number of blocks taken to cycle the phase back to 0). 
+If the ratio of the target frequency and the frequency we're investiaging is a rational number (i.e. can be represented with a whole number fraction), then eventually this phase will come back around to zero (possibly taking several "loops" between 0 and 2 pi at different values - but always the same interval away from the previous cycle phase - before landing exactly on 2 pi).  If you took all the phase value this wave had at the start of each block in the sequence before it comes back around to zero and you sorted them from lowest to highest, you would find these phase values are always *uniformly distributed* between 0 and 2pi (meaning the distance between neighboring points is equal to 2pi / N, where N is the number of blocks taken to cycle the phase back to 0). 
 
 [Aside] IF the ratio of the target frequency to the frequency we're investigating is an irrational number, then the phase will never come back around to zero - but the phase values will be uniformly distributed over [0, 2pi| so the logic we use below still holds [/Aside
 
@@ -279,7 +285,7 @@ So to recap: we have shown that if you have a complex signal made up of a combin
 
 [TODO: validate the above is true through examples.  Specifically, make sure that multiplying a complex wave by sin(x) preserves the characteristics we care about - e.g. that component frequencies multiplied by the target frequency and added together is the same as the complex wave multiplied by the target frequency (not sure what this property is called - associative, distributive, communicative, something else?)]
 
-This is (with a little bit of hand waving) equivalent to the Fourier Transform.  Rather than "breaking up into a bunch of blocks of 1/f," the Fourier Transform is typically conceptualized as "wrapping the function around the origin of the complex plain with a wrapping frequency of f," and rather than "averaging a bunch of blocks together" the Fourier Transform "integrates from -inf to inf."  The Fourier Transform does all of the math using the complex number plane and Euler's Formula (e^(ix) = cos(x) + i * sin(x), with x = pi), and produces a complex number output where the magnitude of the complex number is the amplitude of the frequency component in the signal and the imaginary component of the complex number is the phase of that frequency component.  But conceptually it's doing the exact same thing we did in our attempted intuitive explanation - it's relying on all frequencies that are not integer multiples to cancel themselves out over a long enough time horizon, and its' relying on the symmetry of integer multiple frequencies to cancel out the value of the integral from the other cycles. 
+This is (with a little bit of hand waving) equivalent to the Fourier Transform.  Rather than "breaking up into a bunch of blocks of 1/f," the Fourier Transform is typically conceptualized as "wrapping the function around the origin of the complex plain with a wrapping frequency of f," and rather than "averaging a bunch of blocks together" the Fourier Transform "integrates from -inf to inf."  The Fourier Transform does all of the math using the complex number plane and Euler's Formula (e^(ix) = cos(x) + i * sin(x), with x = pi), and produces a complex number output where the magnitude of the complex number is the amplitude of the frequency component in the signal and the imaginary component of the complex number is the phase of that frequency component.  But conceptually it's doing the exact same thing we did in our intuitive explanation - it's relying on all frequencies that are not integer multiples to cancel themselves out over a long enough time horizon, and its' relying on the symmetry of integer multiple frequencies to cancel out the value of the integral from the other cycles. 
 
 ### Discrete Fourier Transforms
 
@@ -335,47 +341,128 @@ Strictly speaking, spectrograms have a linear y-axis (since that's what the DFT 
 
 Mel-spectrograms are particularly important in an ML context because they allow us to leverage existing image processing techniques for audio analysis.  For example, since convolutions are by construction invariant to spatial translation, it is useful to have perceptually-simillar frequencies laid out in spatially-simillar ways to leverage the inductive bias of CNNS for audio feature extraction.
 
-Note that spectrograms represent frequency amplitudes over time - they don't contain any phase information. The DFT does output phase information, so in principle you could encode that in a spectorgram as well, but in practice it generally isn't done. [Aside] My rough understanding is this is partly because spectrograms of real audio are already encoding SOME of the phase information because of their use of window functions and overlapping frames, partly because jointly modifying amplitude and phase makes downstream modeling tasks harder without adding much benefit, and partly because DFT phase is just an approximation based on assumptions that aren't actually true (such as "there are exactly N component frequencies all equally spaced apart"), so the DFT phase information isn't really the ground truth in the first place. [/Aside]  Instead, conversion of spectrograms back into an audio waveform uses an algorithm to produce phase information that sounds "good enough." The default classical algorithm for this was called Griffin-Lim, [Aside] Griffin-Lim essentially just starts with a random seed and slowly iterates the phase information until it finds a self-consistent phase that can be rendered to an audio wavefrom and then back to a spectrogram indentical to the original. [/Aside] and in the speech domain (particularly text-to-speech models), the model responsible for translating the spectrogram back into an audio waveform (including synthesizing phase information) is known as the "vocoder."  [Aside] The major contribution of original wavenet paper was that it was the first neural vocoder (i.e. a neural network that replaced Griffin-Lim and modeled phase information directly from the spectrogram), which has since become the default approach. [/Aside]  Vocoding today is largely considered a solved problem with no more meaningful headroom in perceptual quality.
+Note that spectrograms represent frequency amplitudes over time - they don't contain any phase information. The DFT does output phase information, so in principle you could encode that in a spectorgram as well, but in practice it generally isn't done. [Aside] My rough understanding is this is partly because spectrograms of real audio are already encoding SOME of the phase information because of their use of window functions and overlapping frames, partly because jointly modifying amplitude and phase makes downstream modeling tasks harder without adding much benefit, and partly because DFT phase is just an approximation based on assumptions that aren't actually true (such as "there are exactly N component frequencies all equally spaced apart"), so the DFT phase information isn't really the ground truth in the first place. [/Aside]  Instead, conversion of spectrograms back into an audio waveform uses an algorithm to produce phase information that sounds "good enough." The default classical algorithm for this was called Griffin-Lim, [Aside] Griffin-Lim essentially just starts with a random seed and slowly iterates the phase information until it finds a self-consistent phase that can be rendered to an audio wavefrom and then back to a spectrogram indentical to the original. [/Aside] and in the speech domain (particularly text-to-speech models), the model responsible for translating the spectrogram back into an audio waveform (including synthesizing phase information) is known as the "vocoder."  [Aside] SOTA audio generation models are typically not generating spectrogram intermediate representations today. While the original wavenet paper (https://arxiv.org/abs/1609.03499) generated audio waveform samples directly with no intermediary representation at all (and can thus be thought of as the first "neural vocoder"), most SOTA models today are generating some sort of "audio token" intermediate representation that plays a simillar role to spectrograms in classical models, and then synthesizing waveform samples from that representation (including phase information).  That audio synthesizer is still sometimes referred to as a "vocoder" for historical reasons. [/Aside]  Vocoding today is largely considered a solved problem with no more meaningful headroom in perceptual quality.
 
-## Classical Audio ML
-We've now laid the ground work for all the pieces needed to talk about how audio ML models worked before transformers / LLMs came to the forefront circa 2020.  We'll briefly discuss the tasks and models used in this period before moving on to what audio looks like in the new LLM world
-
-### Audio Model Types
-There are several ways to slice up the audio ML space.  One important axis for audio data is the *content* of the audio, which generally falls into three categores: speech, music, and open domain (aka "everything else"). Another important axis is whether the task you're trying to accomplish is an analysis task (understanding the content of the audio), a generation task (modifying or creating new audio), or a DSP task (things that are more "signal processing" than they are understanding or generation, such as dereverberation, bandwidth extention, echo cancellation, etc.)
-
-Historically, specialized models were trained for specific tasks within each application area - for example "speech" people and "music" people didn't talk to each other as much as you might think, and speech generation (TTS) and speech analysis (ASR) were almost entirely seperate disciplines with different conferences and academic labs. [Aside] I have always found this somewhat scandalous. It is *beyond obvious* that speech analysis and speech generation ought to *at least* be leveraging shared representations and data even if the core modeling approaches are different.  It was not until audio was adapted into the LLM domain that this became a reality in any meaningful way, and this represents to me an enormous failure of research institutions.[/Aside]  Some signal processing tasks generalize across content typs (e.g. bandwidth extension), but even here it was typical to have seperate models for different content types (e.g. a "speech" bandwidth extention model that is different from the "music" bandwidth extension model)
-
-Of course these categories are artificially discrete, and there are plenty of areas that span these boundaries.
-Speech-to-speech, speech-to-translated-text, universal separation, removal
-
-Orthogonal to these use cases 
-
-Speech ASR
-TTS
-Dynamic EQ
-Source Separation / Speech enhancement / speech & music removal (dubbing, DMCA takedown requests) 
-De-essing
-Reverber / dereverb
-
-### Directional Beamforming
-Directional beamforming is a processing technique that allows an audio signal recorded on two or more mics to be decomposed based on the direction the sound came from.  Essentially this relies on the fact that the delay between when mic 1 and mic 2 hear the same sound is a function of the angle of the sound source relative to the microphones and the distance of the mics from each other.  For only two microphones a known distance apart, a given audio delay is enoug to specify a parabolic cone [TODO: name for this?] along which the sound must have originated; by adding a third mic you can in theory specify a specific point (including distance) of the orignal audio source (so long as that point is not co-planar with the 3 mics).
-
-In practice what this means is that you can take audio recorded on a microphone array with known dimensions and filter it (i.e. delay one and add them together) so that sounds not coming from one particular direction cancel each other out, leaving you only the sounds coming from a particular direction.  This is useful when you want to do things like record audio coming from right in front of a camera while supressing any audio coming from the ambient environment. 
+## Speech, Language, and Semantics
+Speech vs. Language as terms of art in the ML community (also "multimodal")
+Language as symbol sequences 
+Words, lexemes, characters (what's the name of the languages where symbols represent concepts vs. sound?  e.g. kanjii)
+Accents, ligatures, diacritics
+Phonemes
+Prosody
+Text tokenizers - https://platform.openai.com/tokenizer
 
 
-Dynamic beamforming - "delay and sum" - essentially you figure out the expected delay for sound coming from a particular direction, then you add the spectrograms from each mic at that delay.  This will create "constructive intererence" for signals coming from that direction, and "destrictive" interference for signals coming from other directions (seems like this wouldn't work in the presence of constant sounds?)
+## How Classical Audio ML Works
+We've now laid the ground work for all the pieces needed to talk about how audio ML models worked before transformers / LLMs came to the forefront circa 2020.  We'll briefly discuss the tasks and models used in this period before moving on to what audio looks like in the new LLM world.
 
-Audio engineering / mastering
+There are several ways to slice up the audio ML space.  One important axis for audio data is the *content* of the audio, which generally falls into three categores: speech, music, and open domain (aka "everything else"). Another important axis is whether the task you're trying to accomplish is an analysis task (understanding the content of the audio), a generation task (modifying or creating new audio), or a DSP task (things that are more "signal processing" than they are understanding or generation, such as dereverberation, bandwidth extension, echo cancellation, etc.) [Aside] Of course these categories are artificially discrete, and there are plenty of areas that blur these boundaries.  Even before LLMs, there were efforts at speech-to-speech translation models, speech-to-translated-text models, universal audio separation, audio removal, and other tasks that don't fit neatly into a single audio type and task category [/Aside]
+
+Historically, specialized models were trained for individual tasks within each content type; one model for ASR, a different model for denoising, a different model for music generation, etc.  Some tasks generalize across content types (e.g. bandwidth extension), but even here it was typical to have seperate models for different content types (e.g. a "speech" bandwidth extention model that is different from the "music" bandwidth extension model).  Given this reality, it is perhaps not surprising that research in each of these areas was largely siloed - "speech" and "music" people didn't talk to each other nearly as much as you might think, and speech generation (TTS) and speech analysis (ASR) were almost entirely seperate disciplines with different conferences and different academic labs. [Aside] I have always found this somewhat scandalous. It is *beyond obvious* that speech analysis and speech generation ought to *at least* be leveraging shared representations and data even if the core modeling approaches are different.  It was not until audio was adapted into the LLM domain that this became a reality in any meaningful way, and this represents to me an enormous failure of research institutions.[/Aside]  
+
+For the duration of this document we're going to focus almost entirely on the speech domain, but most of what we talk about will have clear parallels in music / open domain audio. 
 
 ### ASR Circa 2020
-wav2vec
-BEST-RQ
+
+Automatic Speech Recognition (ASR) is the task of producing a transcript from a segment of audio. "Transcript" is a bit underspecified, as there are many different capabilities you may want out of an ASR model depending on the use case - some common extensions include:
+- streaming models (where the transcript is produced in real time as new audio comes in)
+- timing information (sentence / word / phoneme start and end times)
+- multilingual support (a single model that can transcribe speech from multiple languages) 
+- vocal burst support (transcribing coughing, sneezing, laughter, and other non-lexical speech-like noises)
+- captioning (annotating important non-speech audio events in-line with transcription text)
+- noise robustness (transcribing in the presence of background noise or channel artifacts)
+- speaker turn identification (identifying in the transcript when the speaker changes, but not identifying when two segments are from the same speaker)
+- multispeaker diarization (identifying which speaker is speaking at any given point in the transcript)
+
+[Aside] In practice, even within the same "task definition" you often get multiple models that claim SOTA performance, and when you go and try them you might find one to be far superior to the other for what you're trying to do.  What's going on here is generally domain shift from the training and eval data, because all models are trained (and sometimes evaled) on data with subtley different characteristics (how noisy is the training data? What is the min / max / average volume of audio samples?  Is there overlapping speech?  Are there any recording channel artifacts like reverb, echo, etc?  What type of microphone was the data captured on?  How long are the min / max / average samples? etc.)  [/Aside]
+
+Intuitively, there's basically two ways to do ASR: 
+1) You have a model predict once every N milliseconds which phoneme it thinks is currently being verbalized in the audio, then you try to piece these predictions together into something that looks like a coherent string of words
+2) You have a big black box model that processes a sequence of audio input, and it directly spits out a sequence of output phonemes of whatever length it feels like 
+
+The first approach is called Connectionist Temporal Classification (CTC), and the second approach is generically referred to as an end-to-end sequence-to-sequence model (sometimes called Seq2Seq models in early literature).
+
+### CTC 
+CTC is a general method for identifying a sequence of symbols from an underlying complex signal that corresponds to those symbols. Roughly speaking, CTC works as follows:
+- You define an "alphabet" of symbols that your model is able to produce (for ASR, the alphabet is generally "the set of all phonemes used in the languages supported by the model" plus a special "blank" symbol.)
+- You define a "window size" for your input data which is the minimum width in your input that might correspond to a single symbol of your output sequence (for ASR, this might be something like "10 ms", meaning you expect every phoneme in the input speech to be at least 40 ms long)
+- You "slide" the window from left to right over your input signal and at each step you produce a probability estimate for each symbol in your alphabet.  The output of each step is an array the same size as your alphabet that sums to exactly 1. Once you've slid over the entire input signal, you have an array of size M x N, where N is the number of symbols in your alphabet and M is the width of the input signal divided by the window size [Aside] In practice you might choose a window stride that is different than your window size, but for the sake of simplicity here we assume they are the same [/Aside].  This array is typically called the "lattice" in CTC.
+- You define a "language model" that specifies a cost for transitioning between two symbols.  Historically this was often an "n-gram" language model, meaning you'd specify sequences of length n that are more or less likely to show up in your output sequence. [Aside] these n-gram models were typically learned automatically from some large corpus of real data rather than hand-coded. [/Aside] This allows you to bias the model toward producing "real" words, while still allowing it to output symbol combinations that aren't found in the language model.
+- Finally, you "decode" the output sequence by finding the "minimum cost path" through the lattice. The "minimum cost" is calculated with a dynamic programming algorithm (Viterbi decoding) that incorporates both the likelihood of the individual symbols calculated for each window step and the likelihood of the various n-gram sequences in the language model [Aside] repeated symbols are typically "merged" together into a single instance as part of the decode step (because a single phoneme duration might extend beyond the window size) [/Aside]
+
+Notice that CTC only works if the underlying input signal has a dimension that is monotonically aligned with the output synbol sequence, meaning that sections of the input sequence that corresponds to output sequence symbols aren't in "different order" than the output sequence symbols themselves.  For example, "time" is the monotonically aligned dimension for audio data; if phoneme A shows up before phoneme B in the audio, then the symbol(s) corresponding to A are guaranteed to show up before the symbols corresponding to B in the transcript. [Aside] Most (but not all) writing systems also have this property - for example, in Latin script "left to right" is the sequence direction for characters when rendered on a page, and ALSO the sequence direction for the unicode codepoints that correspond to those characters.  For this reason, SOTA OCR models circa 2020 were also using a CTC approach.[/Aside]  However, any pair of two different languages are generally not monotonically aligned (some put the verb at the beginning, some at the end, etc), making CTC a bad fit for cross-lingual tasks such as translation.
+
+After CTC you end up with a sequence of phonemes, which can then be converted into a transcript through a lexicon that maps phonetic components onto words (and allows for things like disambiguating homophones based on surrounding context).  A key thing to notice about CTC is that the acoustic model, language model, and lexicon are all completely independent (i.e. they are trained and optimized separately) [Aside] Note that it is in principle possible to incorporate "language model-like" information in the acoustic model if you pick an architecture for your acoustic model that incorporates sequence information (for example, an RNN, or an attention-based model).  You can even use a transformer backbone for your acoustic model and still do CTC-style Veterbi decoding if you want (this exact approach was used in Google's USM model in 2023 with a conformer-based encoder - https://arxiv.org/pdf/2303.01037)) [/Aside]
+
+### End-to-End Sequence-to-Sequence models
+
+The primary challenge the CTC architecture is trying to solve is finding an alignment between the input and output sequence (i.e. which parts of the audio correspond to which output sequence symbols).  This is hard for lots of reasons, one important one being that you generally don't have very much training data where the alignment is accurately annotated; this also means that if you can find a training method that can leverage unaligned data, you have way more data to train on.  Thus, an alternative to an explicit alignment technique like lattice decoding is to train an end-to-end sequence-to-sequence model.  This pushes the complexity of learning an alignment into the model itself, so it generally takes a lot of training data and a fairly large model (compared to classical architectures, not compared to modern LLMs).  
+
+The classic architecture for this sort of problem is a Recurrent Neural Network, an over the 2010's several alternative architectures emerged to improve upon standard RNNs, including RNN-Transducers (https://arxiv.org/abs/1211.3711), attention-based methods (https://research.google/blog/improving-end-to-end-models-for-speech-recognition/), and Conformers (https://arxiv.org/abs/2005.08100).  
+
+One major downside of these approaches is they all operate in "batch mode" - you have to give the model the entirety of the audio you want to transcribe before it can start working, which means that if you want to support "streaming" you have to implmenent some external "chunking" algorithm to break up the input audio, which introduces both complexity and additional sources of error.  An important innovation that happened in the early 2020's was extending the RNN-T architecture to operate in a natively streaming way (https://research.google/blog/an-all-neural-on-device-speech-recognizer/)
+
+We're obviously eliding over lots of complexity here, but the big takeaway is that over time we moved from a cascade of modular independent components into big end-to-end models that scaled well by pre-training on unabled training data, a harbinger of things to come.
+
+## Acoustic Models as Audio Tokenizers
+
+The "acoustic model" component of an ASR model (whether trained independently or as an integrated component of a single end-to-end model) is conceptually responsible for something like "building a good context-dependent representation for what phoneme is being verbalized at any given point in time."  Notice that if you consider "speech" to be something analogous to "language encoded in the audio domain," then if you squint real hard at the internal state of the ASR acoustic model it might start to look simillar to the language model embedding of a text token - i.e. a function that maps an individual input token (e.g. a subword or a spectrogram frame) into an embedding space that some downstream model (e.g. a transformer) can process effectively (e.g. with cross-attention).
+
+This is in fact exactly what early versions of audio-enabled LLMs did; they used a quantized internal state of an ASR model as the "audio tokenizer", and then trained an LLM on a token vocabulary that included both audio tokens and text tokens. This turned out to have a few issues, which we'll cover in the Tokenizer section below.
+
 ### TTS Circa 2020
-Frontend, XXX, vocoder
+
+Text to Speech is the task of producing natural, high-quality speech from a transcript.  Here again there are several subtly different formulations of the problem with different requirements; depending on the context, you may want:
+- pronunciation control
+- speaker control / multispeaker models
+- accent control
+- speed / timing control
+- style / emotion / affect control
+- deterministic output
+- vocal burst support
+- trading off naturalness / expressiveness vs. word error rates
+- multilingual models
+
+There are basically 3 big challenges in TTS:
+1) Control / accuracy - does the model output speech that accurately corresponds to the correct pronunciation of the words in the transcript?
+2) Acoustic quality - does the model output speech that sounds like a real person's voice, or speech that sounds like a robot?
+3) Naturalness & Expressivity - there are many valid prosodic interpretations of a given transcript; does the model output speech that is appropriately natural and expressive for the transcript in the broader context of where the model is being used? (e.g. stylistically appropriate to the setting, consistent with past and future utterances from the same transcript block / agent, affectively consistent with the semantic content of the utterance, etc.)
+
+Classical models mostly had #1 and #2 solved in the late 20-teens, but #3 remained a stubbornly open challenge until the latest wave of Transformer-based models.
+
+### How TTS Models Work(ed)
+
+Frontend, acoustic model, vocoder
+
+
+### Launching Transformer-based Models
+
+You may notice that #1 is in direct tension with #3.  The common wisdom a few years ago was that TTS users REALLY cared about accuracy, and early progress on transformer-based TTS models (which were significantly more natural and expressive, but suffered from higher rates of hallucination and catastrophic failure) was slow to launch because entrenched TTS providers didn't see the user value.  It wasn't until ElevenLabs came along and definitively demonstrated the pend up user demand around more natrual and expressive models that established players started shifting their thinking. [Aside] To be clear, ElevenLabs definitely has SOTA speech generation models. But they also benefited from a 6-12 month head start due to the shortsightedness of encumbents that had nothing to do with technical progress. [/Aside]
+
+Option 1: control knobs
+Option 2: 
+Long-run context is important
+Context prompting
+
+### TTS metrics
+Word Error Rate / Phoneme Error Rate
+MOS
+MOS SxS
+Volume confounding
+MOS is wildl unreliable
+
 Tacotron
 Griffin-Lim
-wavenet
 Convolutional Neural Networks
+Hidden Markov Models
+
+### wavenet
+Receptive field of 300ms
+Output values quantiezed to 256 (non-linear) possible values, allows for softmax loss function
+At least 2 interpretations:
+1) With unconditional sampling, this is just autoregressive token generation where the token codebook is very small (256) and the token width is very small (1/16000 seconds, or ~0.06ms) and produces realistic sounding gibberish (same as early AudioLM experiments)
+2) With conditional sampling, this is just a neural vocoder (you feed it high level sequence features like phonemes, linguistic features, or even spectrogram features, and it produces audio waveform sample values)
+What would you get if you replaced the CNN backbone with a big transformer?
 
 ## LLMs
 Transformers (cross-attention, scale, benefits vs. LSTM / RNNs, scale scale scale)
@@ -387,6 +474,14 @@ Tokenizers and how they impact performance (capital vs. lowercase letters, seque
 Discrete vs. continuous output (cross entropy loss, modeling fundamentally tokenized data (sort of, given first thing transformer does is project tokens into continuous space))
 Note: no time component! fundamentally different from audiovisual data
 
+## Tokens
+W2Vec embeddings
+### Wav2Vec & Wav2Vec 2.0
+### Wave2Vec-BERT 
+### BEST-RQ
+OpenAI tokenizer link
+
+
 ## Audio LLMs
 
 ## Audio Tokenizers
@@ -394,6 +489,10 @@ Wav2Vec
 w2v-bert
 Spectrograms
 Soundstream (RVQ)
+Moshi tokenizer
+Microsoft tokenizer
+
+What is the scale of the information you are trying to model? (for speech generation, you care about the words and the prosody; for audio synthesizer you care about the phase information and fine acoustic details and speaker voice characteristics.  Hierarchical modeling is the obvious way to solve this - but how do you implement it?  acoustic and semantic tokens (plus depthformer) like audiolm?  Heirarchical transformers like Moshi?  Multi-timescale hierarchical tokens like prosody tokens from Aren?  Jointly modeling acoustic and sematnics from same underlying latent, or model them separately?  Jake's thesis: you will get significantly better semantic quality from multimodal LLM output if you find better ways to isolate the semantic information you're trying to model (which is mostly high level word / phoneme / prosody) and treat the synthesis part as a generative task conditioned on semantic representation a la diffusion.  ASR tokens are a TERRIBLE idea for generation.)  Annotated text vs. prosody tokens - the bitter lesson implies we shouldn't work on hand designed features, but rather let the machine learn which features are important.  Prosody tokens > annotations.
 
 AudioLM
 Tortise-TTS (ElevenLabs)
@@ -402,16 +501,64 @@ Tortise-TTS (ElevenLabs)
 AudioPaLM
 ChatGPT
 Gemini
+Veo3
 Sesame Labs (/ Maya? Apparently Johan contributed to that too)
 Streaming / full duplex
 Moshi model- https://github.com/kyutai-labs/moshi
 Facebook superintelligence lab?
 Lab that Miana went to after Google
 
+
 ## Major open questions for Audio LLMs
 Tokenizers
+Continuous distributions / soft-tokens vs. discrtete values / hard tokens (from Wavenet paper - "However, van den Oord et al. (2016a) showed that a softmax distribution tends to work better, even when the data is implicitly continuous (as is the case for image pixel intensities or audio sample values). One of the reasons is that a categorical distribution is more flexible and can more easily model arbitrary distributions because it makes no assumptions about their shape.")
 Model architecture (side channeling information like speaker identity)
 Cross-modal generalization vs. specialization
 Diffusion vs. autoregressive token prediction
-Fine tuning vs. LoRA vs. shoving history in context prompt window
+Fine tuning vs. LoRA vs. shoving history in context prompt window (e.g. RAG)
 Zero and few shot tuning / data efficiency / new algorithms needed
+Multichannel audio tokenizers - model audio sources independently, use spacial information to bias model toward more likely speaker targets; model audio as "speech and non-speech" where the tokenizer is doing implicit speech separation; represent non-speech audio with different tokens than used for speech audio;  Use both low-fidelity speech tokens and high fidelity acoustic tokens as input, but only output the speech tokens and use audio synthesizer to fill in the acoustic gaps
+Channel separated training data
+Non-reconstructive speech tokenizers - explicitly get rid of background noise, channel effects, acoustic enviornment, and even speaker information; just model the semantics of the input speech.  Basically an ASR tokenizer that also captures prosody, not just lexical units; from an information theorteic POV, non-speaker-and-channel-independent tokenizers is equivalent training a text model where every webpage is a different language.  You're asking the model to first implicitly learn a speaker-and-channel-independent representation to operate on, making it job way way harder.
+Pushing boundaries of synthetic data + data augumentation - don't have a good understanding of text data, but seems like adding math and science data can meaningfully change model performance for text; most training data is from very specific acoustic environment
+
+
+https://sebastianraschka.com/blog/2025/from-gpt-2-to-gpt-oss.html
+
+Supervised fine tuning vs. RL HF - what is the difference and why might one work better and in which case? - https://www.reddit.com/r/MachineLearning/comments/1mnfoum/d_has_anyone_tried_crossmodal_transfer_for_visual/
+
+Chain of thought
+Full duplex models
+
+State space models - https://arxiv.org/abs/2111.00396
+WavChat - survey of speech llm models https://arxiv.org/pdf/2411.13577
+SpeechTokenizer - https://github.com/ZhangXInFD/SpeechTokenizer/?tab=readme-ov-file
+SpeechTrident survey - https://github.com/ga642381/speech-trident/
+On the landscape of spoken language models - https://arxiv.org/pdf/2504.08528
+Audio token taxonomy - https://poonehmousavi.github.io/dates-website/taxonomy
+
+-Suno / MusicLM / Song DJ (Googles's music LM thing that launched?)
+-ElevenLabs audio effect generation API
+-TokenSplit / Universal Sound Separation / Audio Magic Eraser
+
+
+![Chart gif](assets/anim.gif)
+<audio controls src="assets/clip.mp3"></audio>
+
+
+----------
+
+
+<link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+<script defer src="https://pyscript.net/latest/pyscript.js"></script>
+
+<py-config>
+  packages = ["altair", "pandas"]  # Pyodide will load these in-browser
+</py-config>
+
+<py-script>
+import pandas as pd, altair as alt
+df = pd.DataFrame({"x": range(10), "y": [v*v for v in range(10)]})
+chart = alt.Chart(df).mark_line().encode(x="x", y="y")
+display(chart)   # renders inline and interactive
+</py-script>
