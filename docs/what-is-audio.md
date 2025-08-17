@@ -1,20 +1,10 @@
 # What is audio?
-
-This page discusses what exactly it is that we perceive as "audio" and the mechanics of how audio propagates around in the real world.
-
-<div id="viz-audio"></div>
-<script type="py" src="py/what_is_audio.py" config="py/pyscript.toml" target="#viz-audio"></script>
-
-## Pressure Waves
 What humans perceive as "sounds" are actually [pressure changes in the air over time](https://en.wikipedia.org/wiki/Sound_pressure#Sound_pressure_level).  
 
-A local pocket of high air pressure (aka compression) is created when something physically pushes air molecules together. Those air molecules have to come from somewhere, so this also creates local pockets of low pressure somewhere nearby. Air molecules in the high pressure area push outward into any low pressure areas around them, while air molecules around any low pressure area push inward to fill the vaccuum.  As the nearby air moves around to equalize these pressure differentials, it creates new pressure differentials with the air on the opposite side of the original disturbance, which in turn try to equalize, create new differentials, etc.  This ultimately creates pockets of high and low pressure that propogate outward from the original point in a shape that we call "waves" (these are exactly the same fluid dynamics that cause ripples when you drop a pebble in water). When you "hear" a sound, that is your brain interpreting these pressure waves.  
+A local pocket of high air pressure (aka compression) is created when something physically pushes air molecules together. Those air molecules have to come from somewhere, so this also creates local pockets of low pressure somewhere nearby. Air molecules in the high pressure area push outward into any low pressure areas around them, while air molecules around any low pressure area push inward to fill the vaccuum.  As the nearby air moves around to equalize these pressure differentials, it creates new pressure differentials with the air on the opposite side of the original disturbance, which in turn try to equalize, create new differentials, etc.  This ultimately creates pockets of high and low pressure that propogate outward from the original point in a shape that we call "waves" (these are exactly the same fluid dynamics that cause ripples when you drop a pebble in water). When you "hear" a sound, that is your brain interpreting these pressure waves.  See [this page](https://nsinstruments.com/principles/approaches.html) for a much deeper exploration. 
 
 
-See [this page](https://nsinstruments.com/principles/approaches.html) for a much deeper exploration. 
-
-
-[GIF] visualization of a sin wave oscilating, and below that an aligned visualization of scattered particles on a 2D plane moving in such a way as to show the "wave" passing through them [/GIF]
+![visualization of a sin wave oscilating, and below that an aligned visualization of scattered particles on a 2D plane moving in such a way as to show the "wave" passing through them](assets/sin_pressure_wave.gif)
 
 Waves have both a *frequency* (how "quickly" the wave oscillates, aka the inverse of the "period") and an *amplitude* (how "high" the wave goes from top to bottom). 
 
@@ -167,3 +157,6 @@ In practice what this means is that you can take audio recorded on a microphone 
 
 ??? note "separating information streams in audio" 
 	In the context of this document, we mention beamforming mostly to make the point that it is possible in some contexts to isolate different information streams within the same audio recording.  This opens up some possibilities for novel audio tokenization / preprocessing that could improve model performance that are discussed below
+
+<div id="viz-audio"></div>
+<script type="py" src="py/what_is_audio.py" config="py/pyscript.toml" target="#viz-audio"></script>
