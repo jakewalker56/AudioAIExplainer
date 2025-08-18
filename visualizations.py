@@ -119,7 +119,7 @@ def sin_wave_annotated_png():
 	ax.set_xlim(0, 2*np.pi)
 	ax.set_ylim(-1.1, 1.1)
 
-	img_path = "docs/assets/sine_wave_annotated.png"
+	img_path = "docs/assets/sin_wave_annotated.png"
 	plt.savefig(img_path, dpi=150, bbox_inches="tight")
 	plt.close()
 
