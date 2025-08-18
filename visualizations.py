@@ -92,7 +92,7 @@ def sin_wave_annotated_png():
 
 	fig, ax = plt.subplots(figsize=(8,4))
 	ax.plot(x, y, lw=2)
-	ax.set_title("Sine Wave with Amplitude and Period", fontsize=14)
+	ax.set_title("Sin Wave with Amplitude and Period", fontsize=14)
 	ax.set_xlabel("x")
 	ax.set_ylabel("y")
 
