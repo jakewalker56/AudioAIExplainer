@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
+# python -c "import visualizations; visualizations.sin_wave_DFT()"
 def sin_wave_DFT():
 	# Parameters
 	fs = 20  # sampling rate (Hz)
@@ -57,7 +58,7 @@ def sin_pressure_wave_gif():
 	scat = ax2.scatter(particles_x, particles_y, c="blue")
 	ax2.set_xlim(0, 4*np.pi)
 	ax2.set_ylim(-1.5, 1.5)
-	ax2.set_title("Pressure wave paassing through air particles")
+	ax2.set_title("Pressure wave passing through air particles")
 
 	def init():
 	    line.set_data([], [])
@@ -78,6 +79,47 @@ def sin_pressure_wave_gif():
 	ani_longitudinal = animation.FuncAnimation(fig, animate_longitudinal, init_func=init, frames=frames, interval=50, blit=True)
 
 	# Save as GIF
-	gif_path_longitudinal = "assets/sin_pressure_wave.gif"
+	gif_path_longitudinal = "docs/assets/sin_pressure_wave.gif"
 	ani_longitudinal.save(gif_path_longitudinal, writer="pillow")
+
+
+
+# python -c "import visualizations; visualizations.sin_wave_annotated_png()"
+def sin_wave_annotated_png():
+	# Data for sine wave
+	x = np.linspace(0, 2*np.pi, 500)
+	y = np.sin(x)
+
+	fig, ax = plt.subplots(figsize=(8,4))
+	ax.plot(x, y, lw=2)
+	ax.set_title("Sine Wave with Amplitude and Period", fontsize=14)
+	ax.set_xlabel("x")
+	ax.set_ylabel("y")
+
+	# Mark amplitude
+	ax.annotate("Amplitude = 1",
+	            xy=(np.pi/2, 1), xytext=(np.pi/2+0.1, 0.1),
+	            fontsize=12, color="red")
+
+	# Vertical line for amplitude
+	ax.vlines(np.pi/2, 0, 1, colors="red", linestyles="--")
+
+	# Mark period (2π)
+	ax.annotate("Period (T) = 2π",
+	            xy=(2*np.pi, 0), xytext=(np.pi + 1, -0.2),
+	            fontsize=12, color="blue")
+
+	# Double arrow for period
+	ax.hlines(0, 0, 2*np.pi, colors="blue", linestyles="--")
+	
+	# Add equation for frequency
+	ax.text(4, 0.6, r"$f = \dfrac{1}{T}$", fontsize=14, bbox=dict(facecolor="white", edgecolor="black"))
+
+	# Adjust limits
+	ax.set_xlim(0, 2*np.pi)
+	ax.set_ylim(-1.1, 1.1)
+
+	img_path = "docs/assets/sine_wave_annotated.png"
+	plt.savefig(img_path, dpi=150, bbox_inches="tight")
+	plt.close()
 

@@ -1,5 +1,4 @@
 # AudioAIExplainer
-This project aims to provide an intuitive introduction to the audio AI space as it exists in August 2025.
+This project aims to provide an intuitive introduction to the audio AI space as it exists in August 2025.  I place a great deal of emphasis on the "intuitive" part; please do not rely on this document to be literally and precisely correct in every respect.
 
-## About the author
-Jake Walker spent a decade as a PM in Google Research and Google DeepMind primarily working on audio AI projects. He left that role in early 2025 and wrote this set of documents in an attempt to capture the knowlege he had accrued before it faded into the void.  He has posted it publicly in the hopes that some future aspiring audio PM may have a less tumultuous path than he did to acquire this knowledge.
+A large amount of this document was generated in collaboration with commercially available LLM models; when I didn't know things I asked Gemini questions, and when I needed help making a GIF I asked ChatGPT for python code.  If this offends you this is probably not the doc for you.  Any code used to generate media is available at the associated [github repo](https://github.com/jakewalker56/AudioAIExplainer)

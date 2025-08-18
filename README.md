@@ -15,7 +15,7 @@ display("hello from Python")
 
 
 
-
+This is the github repository for the [Audio AI Explainer](https://jakewalker56.github.io/AudioAIExplainer/) project.
 
 ![Chart gif](assets/anim.gif)
 <audio controls src="assets/clip.mp3"></audio>

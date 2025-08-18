@@ -32,6 +32,8 @@ Saturation
 ## Speaker limitations
 Frequency response
 
+"Computer speakers can typically play frequencies down to around 60-80 Hz without significant issues. However, some speakers, especially those designed for deeper bass (like those in 2.1 systems with a subwoofer), can reproduce frequencies as low as 20-40 Hz. The lowest frequency a speaker can play without distortion or damage depends on its design and power handling capabilities." - Gemini
+
 ## Frequency Decomposition & Fourier Transforms
 
 As we discussed above, complex tones are made up of a combination of simple component frequencies. The amplitude of these component frequencies (possibly shifted by some phase) are added together to produce a single interference pattern, which is the actual pressure wave that propogates through the air and produces sound.  When you "hear" that sound, your ears and brain are decomposing the interference pattern into its constituent frequencies; you can "tell" that a given interference pattern consists of a 400 Hz, 500 Hz, and 600 Hz signal. Humans do this by having physical elements in the ear drum that resonate with different frequency ranges; you literally have nerve cells in your ear that are responsible for detecting the amplitude of any frequency between 50-55 Hz [TODO: find numbers of a real cel group] present in a given sound.  The brain then interprets these signals over time to form your sense of hearing. 

@@ -6,31 +6,45 @@ A local pocket of high air pressure (aka compression) is created when something 
 
 ![visualization of a sin wave oscilating, and below that an aligned visualization of scattered particles on a 2D plane moving in such a way as to show the "wave" passing through them](assets/sin_pressure_wave.gif)
 
-Waves have both a *frequency* (how "quickly" the wave oscillates, aka the inverse of the "period") and an *amplitude* (how "high" the wave goes from top to bottom). 
+Waves have a *period* (the distance over which they complete one full cycle) and an *amplitude* (how high the wave goes).  They also have a *frequency* (how quickly the wave oscillates), which is by definition just the inverse of the period
 
-[Image] a sign wave with the amplitude and period visually identified showing the equation "frequency = 1 / period" [/Image]
+![a sin wave with the amplitude and period visually identified showing the equation "frequency = 1 / period"](assets/sin_wave_annotated.gif) 
 
-Because audio is a *time varying* signal (i.e. the x-axis is time), the period is measured in seconds and the frequency is measured in Hertz (number of cycles per second). The typical range of human hearing is roughly 20 Hz - 20 kHz (which tends to decrease to around 8-12 kHz in our 50's and 60's).
+Because audio is a *time varying* signal (i.e. the x-axis is time), the period of an audio wave is measured in seconds and the frequency is measured in Hertz (number of cycles per second). The typical range of human hearing is roughly 20 Hz - 20,000 Hz (or 20 kHz), though the upper range tends to decrease to around 8 - 12 kHz in our 50's and 60's.
 
-The amplitude of a sound wave corresponds to "volume" or "intensity" of the sound, and the y-axis is literally a measuring the air pressure at a given point in space over a period of time (the x-axis). If you remember your chemistry, the ideal gas law states that PV = nRT, or pressure = number of particles x constant x temperature / volume.  Temperature is defined as the average kinetic energy (kg x m^2 / s^2) per particle of a gas, so the units of pressure are generally given as "Newtons per square meter" (aka "Pascals"), where a Newton is a unit of force (measured in kg x m / s^2).  "Force per square meter" is conceptually useful, as you can think of pressure as "the amount of force exerted by a volume of gas on a container trying to hold that volume of gas", which aligns with most people's understanding of pressure.
+The amplitude of a sound wave corresponds to the *volume* or *intensity* of the sound, and the y-axis is literally a measure of the air pressure at a given point in space over a period of time. 
 
-While pressure can be measured "objectively" as Newtons per square meter, it turns out this is not how we actually talk about sound volume.  Instead, we talk about sound volume in units of [decibes (dB)](https://en.wikipedia.org/wiki/Decibel), which is a *relative* unit of measure expressing the ratio of two values of a power or root-power quantity on a logarithmic scale (in this case sound pressure is a root-power quantity, meaning the square of sound pressure is proportional to power).  What this means in practice is that if you have two time-varying pressure signals (e.g. two sound waves) X and Y, you can calculate the root mean square of the each (i.e. the average value of the square of the pressure measurements of each signal over a given time period), and the dB value relating the two is proportional to the log_10 of the ratio of the RMS values (specifically, X would be considered 20 * log_10(RMS(X)/RMS(Y)) dB louder than Y).  
+??? note "scientific units of pressure" 
+	If you remember your chemistry, the ideal gas law states that PV = nRT, or pressure = number of particles x some constant x temperature / volume.  Temperature is defined as the average kinetic energy (kg x m^2 / s^2) per particle of a gas.  If you rearrange the ideal gas law, you'll find that the units of pressure simplify to "Newtons per square meter" (also known as "Pascals"), where a Newton is a unit of force (with units of kg x m / s^2). 
+
+	"Force per square meter" aligns with most people's intuitive understanding of pressure - you can think of it as "the amount of force exerted by a volume of gas on a container trying to hold that volume of gas".
+
+While pressure can be measured "objectively" as Newtons per square meter, it turns out this is not how we actually talk about sound volume.  Instead, we talk about sound volume in units of [decibels (dB)](https://en.wikipedia.org/wiki/Decibel), which is a *relative* unit of measure expressing the ratio of two values on a logarithmic scale.
+
+??? note "math behind dedibels" 
+	In the case of audio waves, pressure is a root-power quantity, meaning the square of the sound wave pressure is proportional to power.  This means if you have two time-varying pressure signals (e.g. two sound waves) X and Y, you can calculate the root mean square of each (i.e. the average value of the square of the pressure measurements of each signal over a given time period), and the dB value relating the two is proportional to the log_10 of the ratio of the RMS values - specifically, X would be considered 20 * log_10(RMS(X)/RMS(Y)) dB louder than Y.  
+
+	Colloquially you might say that if X is "20 dB louder" than Y, that means X is "100 times louder" (more technically, it means the amount of power in X is 100 times more than the amount of power in Y)
 
 That's a lot of big words to make the simple point that *dB is a relative unit of measure*.  When people talk about a sound being "90 dB", what they mean is "90 dB louder than a particular reference sound."  In audio, the reference sound is basically always 20 micropascals (μPa), which is generally considered "the quietest sound a human can hear" and would correspond with a volume of "0 dB" in common usage.
 
-??? note "more on dB"
-	Because dB is a generic measure of the ratio of two signals, it can occasionally be an overloaded term in the audio space; for example, the primary metric used in audio separation and enhancement tasks is Signal To Noise Ratio (SNR), which is also measured in dB (or dB gain) with the ground truth "noise" as the reference signal (as opposed to the 20 μPa reference sound used for sound volume).
+??? note "sound pressure level reference"
+	When use say "the reference sound is 20 micropascals", what we mean is "the reference sound is a wave for which the RMS is 20 micropascals".  So it's a statement about the *pressure differential created by the wave*, not a statement about the ambient air pressure or the specific pressure at the peak or trough of the reference wave.  Note that the ambient air pressure at sea level is approximately 1 Atmosphere, or 101,325 Pascals.  So the pressure differential human ears are able to detect is really, really small relative to the ambient pressure around us. 
 
-Note that the amplitude of an air pressure wave changes over both time and distance; the farther you get from the source of the wave the smaller the amplitude gets (due to the inverse square law), and for a given distance away from a sound source the amplitude will decrease over time (due to energy loss through friction and absorbtion).  For simplicity, some audio analysis techniques assume that audio sources and receivers remain fixed in space, and conduct analysis on a small enough time scale that amplitude decay is negligible.  But in the real world sound wave propogation is a complex and dynamic system.
+??? note "other meanings of dB"
+	Because dB is a generic measure of the ratio of two signals, it can occasionally be an overloaded term in the audio space; for example, the primary metric used in audio separation and enhancement tasks is Signal To Noise Ratio (SNR), which is also measured in dB (or dB gain) with the ground truth "noise" as the reference signal (as opposed to the 20 μPa reference sound used for sound volume). 
 
-??? note "brief discussion of temperature"
-	If you are anything like me, you may be bothered by the fact that (all else equal) pressure changes with the temperature of the medium, so you can't actually talk about "sound pressure" without talking about the air temperature at the time the signal is propogated.  I have no idea how ambient temperature affects human perception or microphone recording of audio, nor do I know if any issues arise when comparing signals captured in different ambient temperatures; however, my rough understanding is that "it's a small enough deal that it doesn't matter in practice"
+The amplitude of an air pressure wave changes over both time and distance; as you get farther away from the source of the wave the the amplitude shrinks following the [inverse square law](https://en.wikipedia.org/wiki/Inverse-square_law)) (because the energy of the wave is being dissapated by being spread out over more and more area), and the longer amount of time has passed since the sound wave started the more the amplitude will decrease (due to energy loss through friction and absorbtion).  For simplicity, some audio analysis techniques assume that audio sources and receivers remain fixed in space, and conduct analysis on a small enough time scale that amplitude decay is negligible.  But in the real world sound wave propogation is a complex and dynamic system.
+
+??? note "a brief discussion of temperature"
+	If you are anything like me, you may be bothered by the fact that both temperature and altitude change the ambient air pressure, so you can't actually talk about "sound pressure" without taking into account air temperature and altitude at the time and location the sound wave is propogated.  The way to resolve this is to recognize that what characterizes a sound wave is not the absolute pressure, but rather the pressure *differential*. Lower absolute ambient pressure does in fact reduce the pressure differential of a sound wave (and therefore the perceived volume) given the same initial impulse, but it affects all sound waves in roughly the same way, so it's not something that tends to come up in most technical audio discussions.
 
 ## How do waves combine together to create sound?
-Here's an example of what a single 12 KhZ wave sounds like:
+Here's an example of what a single 500 Hz wave sounds like:
 
-[Audio] audio of a single sin wave at 12 KhZ[/Audio]
-[Image] image of a single sin wave [/Image]
+
+![audio of a single sin wav at 500 Hz](assets/single_500Hz_wave.wav) 
+![image of a single sin wav at 500 Hz](assets/single_500Hz_wave.png)
 
 Of course in the real world audio is not just one wave at a time, it's many overlapping waves happening at the same time. When two waves are propogating through the same medium at the same time, the amplitudes add together and the resulting signal (called the "interference") is a "complex tone" made up of more than one frequency. Here's an example of two different frequency waves played at the same time:
 
