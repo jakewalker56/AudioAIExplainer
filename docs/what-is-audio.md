@@ -8,7 +8,7 @@ A local pocket of high air pressure (aka compression) is created when something 
 
 Waves have a *period* (the distance over which they complete one full cycle) and an *amplitude* (how high the wave goes).  They also have a *frequency* (how quickly the wave oscillates), which is by definition just the inverse of the period
 
-![a sin wave with the amplitude and period visually identified showing the equation "frequency = 1 / period"](assets/sin_wave_annotated.gif) 
+![a sin wave with the amplitude and period visually identified showing the equation "frequency = 1 / period"](assets/sin_wave_annotated.png) 
 
 Because audio is a *time varying* signal (i.e. the x-axis is time), the period of an audio wave is measured in seconds and the frequency is measured in Hertz (number of cycles per second). The typical range of human hearing is roughly 20 Hz - 20,000 Hz (or 20 kHz), though the upper range tends to decrease to around 8 - 12 kHz in our 50's and 60's.
 
@@ -42,9 +42,8 @@ The amplitude of an air pressure wave changes over both time and distance; as yo
 ## How do waves combine together to create sound?
 Here's an example of what a single 500 Hz wave sounds like:
 
-
-![audio of a single sin wav at 500 Hz](assets/single_500Hz_wave.wav) 
-![image of a single sin wav at 500 Hz](assets/single_500Hz_wave.png)
+![audio of a single sin wav at 500 Hz](assets/single_500hz_wave.wav) 
+![image of a single sin wav at 500 Hz](assets/single_500hz_wave.png)
 
 Of course in the real world audio is not just one wave at a time, it's many overlapping waves happening at the same time. When two waves are propogating through the same medium at the same time, the amplitudes add together and the resulting signal (called the "interference") is a "complex tone" made up of more than one frequency. Here's an example of two different frequency waves played at the same time:
 
