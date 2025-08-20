@@ -30,3 +30,13 @@ Audio token taxonomy - https://poonehmousavi.github.io/dates-website/taxonomy
 -Suno / MusicLM / Song DJ (Googles's music LM thing that launched?)
 -ElevenLabs audio effect generation API
 -TokenSplit / Universal Sound Separation / Audio Magic Eraser
+https://github.com/bill13579/beltout
+ChatGPT standard vs advanced voice mode
+
+Multi-head attention
+Deepseek, Qwen, benchmarking
+Cartesia / sonic tts model
+Moshi, SeamlessM4T, AudioPaLM, sesame labs papers
+Adversarial veo3 prompts
+SpeechTokenizer, Moshi, SoundStorm, MIMI tokens, Aren prosody tokens
+Deepseek paper 

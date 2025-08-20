@@ -30,9 +30,11 @@ You may hear audio quality described in terms of "bitrate."  The bitrate is lite
 Saturation
 
 ## Speaker limitations
-Frequency response
+Frequency response curves
 
 "Computer speakers can typically play frequencies down to around 60-80 Hz without significant issues. However, some speakers, especially those designed for deeper bass (like those in 2.1 systems with a subwoofer), can reproduce frequencies as low as 20-40 Hz. The lowest frequency a speaker can play without distortion or damage depends on its design and power handling capabilities." - Gemini
+
+The typical range of human hearing is roughly 20 Hz - 20 kHz, though the upper range tends to decrease to around 8 - 12 kHz in our 50's and 60's. A4 is the "standard reference pitch" in music, and is 440 Hz.  E2 (the lowest string on a guitar) is 82.41 Hz.  The lowest frequency present in human speech (the "fundamental frequency") generally ranges from ~80-300 Hz depending on the speaker, but human speech audio typically has significnant energy spread across frequencies from 250 Hz all the way up to 5 kHz. High quality digital audio storage typically support frequencies of at least 22 kHz.  Most headphones support playback for audio across the whole range of human hearing (20 Hz - 20 kHz), but laptop speakers typically cannot playback lower frequency ranges, and are limited to a range like 200 Hz - 18 kHz.
 
 ## Frequency Decomposition & Fourier Transforms
 

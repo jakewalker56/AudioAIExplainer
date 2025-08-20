@@ -42,7 +42,7 @@ The amplitude of an air pressure wave changes over both time and distance; as yo
 ## How do waves combine together to create sound?
 Here's an example of what a single 500 Hz wave sounds like:
 
-<audio controls src="assets/single_500hz_wave.wav"></audio>
+<audio controls src="../assets/single_500hz_wave.wav"></audio>
 ![image of a single sin wav at 500 Hz](assets/single_500hz_wave.png)
 
 Of course in the real world audio is not just one wave at a time, it's many overlapping waves happening at the same time. When two waves are propogating through the same medium at the same time, the amplitudes add together and the resulting signal (called the "interference") is a "complex tone" made up of more than one frequency. Here's an example of two different frequency waves played at the same time:
@@ -56,6 +56,9 @@ Humans interpret some combinations of frequencies as "sounding better" together 
 
 [Audio] audio of 3 sin waves playing a c major chord [/Audio]
 [Image] image of the above sin waves together [/Image]
+
+??? info "some frequency reference points for real world audio"
+	The typical range of human hearing is roughly 20 Hz - 20 kHz, though the upper range tends to decrease to around 8 - 12 kHz in our 50's and 60's. A4 is the "standard reference pitch" in music, and is 440 Hz.  E2 (the lowest string on a guitar) is 82.41 Hz.  The lowest frequency present in human speech (the "fundamental frequency") generally ranges from ~80-300 Hz depending on the speaker, but human speech audio typically has significnant energy spread across frequencies from 250 Hz all the way up to 5 kHz. High quality digital audio storage typically support frequencies of at least 22 kHz.  Most headphones support playback for audio across the whole range of human hearing (20 Hz - 20 kHz), but laptop speakers typically cannot playback lower frequency ranges, and are limited to a range like 200 Hz - 18 kHz.
 
 ## Phase
 Human ears can identify (and often have preferences for) frequencies that are integer multiples, share common divisors, or are otherwise mathematically related to each other.  However, if you naively play these frequencies together, it can sound wrong in a way that is *extremely noticeable* to human ears:
